@@ -790,7 +790,7 @@ em {
   text-decoration: line-through;
 }
 
-.tour-empty {
+.empty-panel {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -801,7 +801,7 @@ em {
   background: rgba(8, 8, 10, 0.45);
 }
 
-.tour-empty-badge {
+.empty-panel-badge {
   font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.22em;
@@ -809,20 +809,20 @@ em {
   color: var(--blue);
 }
 
-.tour-empty-title {
+.empty-panel-title {
   font-family: var(--display);
   font-size: clamp(1.5rem, 3.6vw, 2.3rem);
   line-height: 1;
   text-transform: uppercase;
 }
 
-.tour-empty-note {
+.empty-panel-note {
   max-width: 46ch;
   color: rgba(243, 241, 234, 0.66);
   font-size: 0.94rem;
 }
 
-.tour-empty .btn {
+.empty-panel .btn {
   margin-top: 0.4rem;
 }
 
