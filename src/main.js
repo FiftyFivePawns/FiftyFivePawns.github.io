@@ -54,6 +54,33 @@ document.querySelectorAll('[data-year]').forEach((el) => {
   el.textContent = String(new Date().getFullYear())
 })
 
+// Ticker: repeat the group until it covers the viewport twice, so the
+// -50% shift loops with no seam and no empty stretch on wide screens.
+const marqueeTrack = document.querySelector('[data-marquee]')
+
+if (marqueeTrack) {
+  const marquee = marqueeTrack.parentElement
+  const group = marqueeTrack.firstElementChild
+  const PIXELS_PER_SECOND = 26
+
+  const fillMarquee = () => {
+    let guard = 0
+    while (
+      marqueeTrack.scrollWidth < marquee.clientWidth * 2 &&
+      guard < 8
+    ) {
+      marqueeTrack.append(group.cloneNode(true), group.cloneNode(true))
+      guard += 1
+    }
+    // Keep the speed steady however many copies were needed.
+    const shift = marqueeTrack.scrollWidth / 2
+    marqueeTrack.style.animationDuration = `${(shift / PIXELS_PER_SECOND).toFixed(1)}s`
+  }
+
+  fillMarquee()
+  window.addEventListener('resize', fillMarquee)
+}
+
 // News posts live in news.json so they can be added or deleted without
 // touching this page (see admin.html). Without a file, the empty state stays.
 const newsFeed = document.getElementById('news-feed')

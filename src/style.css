@@ -621,10 +621,6 @@ em {
   white-space: nowrap;
 }
 
-.marquee-group:first-child {
-  padding-left: 1.4rem;
-}
-
 .star {
   font-size: 0.75rem;
 }
