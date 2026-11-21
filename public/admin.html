@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>No Signal — News desk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:opsz,wght@9..40,300..700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #08080a;
+        --panel: #101014;
+        --paper: #f3f1ea;
+        --muted: #928f89;
+        --red: #ff2f2f;
+        --acid: #e8ff3d;
+        --line: rgba(243, 241, 234, 0.16);
+        --display: "Anton", Impact, sans-serif;
+        --body: "DM Sans", system-ui, sans-serif;
+        color-scheme: dark;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--ink);
+        color: var(--paper);
+        font-family: var(--body);
+        font-size: 1rem;
+        line-height: 1.6;
+        padding: 2rem 1.25rem 5rem;
+      }
+      .wrap {
+        max-width: 780px;
+        margin: 0 auto;
+        display: grid;
+        gap: 1.5rem;
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+      h1 {
+        font-family: var(--display);
+        font-weight: 400;
+        font-size: clamp(1.8rem, 5vw, 2.6rem);
+        text-transform: uppercase;
+        line-height: 1;
+        margin: 0;
+      }
+      h2 {
+        font-family: var(--display);
+        font-weight: 400;
+        font-size: 1.1rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin: 0 0 0.9rem;
+      }
+      a {
+        color: var(--acid);
+      }
+      .panel {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        padding: 1.35rem;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin: 0;
+      }
+      form,
+      .row {
+        display: grid;
+        gap: 0.85rem;
+      }
+      .row {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      }
+      label {
+        display: grid;
+        gap: 0.35rem;
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 0.7rem 0.8rem;
+        background: #050506;
+        border: 1px solid var(--line);
+        color: var(--paper);
+        font: inherit;
+        letter-spacing: normal;
+        text-transform: none;
+      }
+      textarea {
+        resize: vertical;
+        min-height: 6rem;
+      }
+      input:focus,
+      textarea:focus {
+        outline: 2px solid var(--acid);
+        outline-offset: 1px;
+      }
+      button {
+        justify-self: start;
+        padding: 0.75rem 1.3rem;
+        background: var(--red);
+        color: var(--ink);
+        border: 0;
+        font-family: var(--display);
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      button.ghost {
+        background: transparent;
+        color: var(--paper);
+        border: 1px solid var(--line);
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: progress;
+      }
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 0.8rem;
+      }
+      li {
+        border: 1px solid var(--line);
+        padding: 0.9rem 1rem;
+        display: grid;
+        gap: 0.5rem;
+      }
+      .post-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .post-head .date {
+        color: var(--paper);
+      }
+      .post-head .tag {
+        color: var(--red);
+        border: 1px solid var(--line);
+        padding: 0.15rem 0.5rem;
+      }
+      .post-text {
+        margin: 0;
+        white-space: pre-line;
+      }
+      li button {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.75rem;
+        background: transparent;
+        color: var(--red);
+        border: 1px solid rgba(255, 47, 47, 0.4);
+        justify-self: start;
+      }
+      #status {
+        margin: 0;
+        min-height: 1.5rem;
+        font-size: 0.9rem;
+      }
+      #status.error {
+        color: var(--red);
+      }
+      #status.ok {
+        color: var(--acid);
+      }
+      code {
+        font-size: 0.9em;
+        color: var(--paper);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>News desk</h1>
+        <a href="./index.html">← Back to the site</a>
+      </header>
+
+      <p class="meta">
+        Posts are saved to <code>public/news.json</code> in
+        <code>FiftyFivePawns/FiftyFivePawns.github.io</code>. Saving pushes a
+        commit, GitHub rebuilds the site, and the post is live within a minute
+        or two.
+      </p>
+
+      <section class="panel">
+        <h2>1 · Access</h2>
+        <p class="meta">
+          Paste a GitHub fine-grained token with <strong>Contents: read and
+          write</strong> on this one repository. It is stored only in this
+          browser (<code>localStorage</code>) and is never sent anywhere except
+          github.com.
+        </p>
+        <div class="row">
+          <label>
+            Token
+            <input id="token" type="password" autocomplete="off" placeholder="github_pat_…" />
+          </label>
+        </div>
+        <div class="row" style="grid-template-columns: auto auto">
+          <button class="ghost" id="token-save" type="button">Save token</button>
+          <button class="ghost" id="token-forget" type="button">Forget token</button>
+        </div>
+        <p class="meta" id="token-state">No token saved yet.</p>
+      </section>
+
+      <section class="panel">
+        <h2>2 · New post</h2>
+        <form id="post-form">
+          <div class="row">
+            <label>
+              Date
+              <input id="post-date" type="date" required />
+            </label>
+            <label>
+              Tag <span class="meta">(optional)</span>
+              <input id="post-tag" type="text" maxlength="20" placeholder="Studio" />
+            </label>
+          </div>
+          <label>
+            Text
+            <textarea id="post-text" rows="4" required placeholder="Two or three lines is plenty."></textarea>
+          </label>
+          <button type="submit" id="post-submit">Publish</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>3 · Posts on the site</h2>
+        <p class="meta" id="list-state">Loading…</p>
+        <ul id="post-list"></ul>
+      </section>
+
+      <p id="status" role="status"></p>
+    </div>
+
+    <script>
+      const OWNER = 'FiftyFivePawns'
+      const REPO = 'FiftyFivePawns.github.io'
+      const PATH = 'public/news.json'
+      const BRANCH = 'main'
+      const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`
+      const TOKEN_KEY = 'nosignal_news_token'
+
+      const $ = (id) => document.getElementById(id)
+      const statusEl = $('status')
+      let sha = null
+      let posts = []
+
+      const setStatus = (message, kind = '') => {
+        statusEl.textContent = message
+        statusEl.className = kind
+      }
+
+      const token = () => localStorage.getItem(TOKEN_KEY) || ''
+
+      const authHeaders = () => ({
+        Accept: 'application/vnd.github+json',
+        Authorization: `Bearer ${token()}`,
+        'X-GitHub-Api-Version': '2022-11-28',
+      })
+
+      const decodeBase64 = (value) => {
+        const binary = atob(value.replace(/\s/g, ''))
+        const bytes = new Uint8Array(binary.length)
+        for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i)
+        return new TextDecoder().decode(bytes)
+      }
+
+      const encodeBase64 = (text) => {
+        const bytes = new TextEncoder().encode(text)
+        let binary = ''
+        for (let i = 0; i < bytes.length; i += 1) binary += String.fromCharCode(bytes[i])
+        return btoa(binary)
+      }
+
+      const formatDate = (value) => {
+        const date = new Date(`${value}T00:00:00Z`)
+        if (Number.isNaN(date.getTime())) return value || 'No date'
+        return new Intl.DateTimeFormat('en-GB', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          timeZone: 'UTC',
+        }).format(date)
+      }
+
+      const request = async (url, options = {}) => {
+        const response = await fetch(url, {
+          ...options,
+          headers: { ...authHeaders(), ...(options.headers || {}) },
+        })
+        if (response.status === 401) throw new Error('GitHub rejected the token. Check it has not expired.')
+        if (response.status === 403) throw new Error('GitHub refused the request. The token needs Contents: read and write on this repository.')
+        if (response.status === 404) return { missing: true, response }
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}))
+          throw new Error(body.message || `GitHub said ${response.status}.`)
+        }
+        return { data: await response.json(), response }
+      }
+
+      const renderList = () => {
+        const list = $('post-list')
+        const state = $('list-state')
+        list.replaceChildren()
+
+        if (!posts.length) {
+          state.textContent = token()
+            ? 'No posts yet. Write one above.'
+            : 'Save a token to see and manage the posts.'
+          return
+        }
+
+        state.textContent = `${posts.length} post${posts.length === 1 ? '' : 's'}.`
+
+        posts.forEach((post, index) => {
+          const item = document.createElement('li')
+
+          const head = document.createElement('div')
+          head.className = 'post-head'
+
+          const date = document.createElement('span')
+          date.className = 'date'
+          date.textContent = formatDate(post.date)
+          head.append(date)
+
+          if (post.tag) {
+            const tag = document.createElement('span')
+            tag.className = 'tag'
+            tag.textContent = post.tag
+            head.append(tag)
+          }
+
+          const text = document.createElement('p')
+          text.className = 'post-text'
+          text.textContent = post.text
+
+          const remove = document.createElement('button')
+          remove.type = 'button'
+          remove.textContent = 'Delete'
+          remove.addEventListener('click', () => deletePost(index))
+
+          item.append(head, text, remove)
+          list.append(item)
+        })
+      }
+
+      const load = async () => {
+        if (!token()) {
+          renderList()
+          return
+        }
+        setStatus('Loading posts…')
+        try {
+          const { data, missing } = await request(`${API}?ref=${BRANCH}`)
+          if (missing) {
+            sha = null
+            posts = []
+            setStatus('No news.json yet — publishing the first post will create it.', 'ok')
+          } else {
+            sha = data.sha
+            const parsed = JSON.parse(decodeBase64(data.content || ''))
+            posts = Array.isArray(parsed.posts) ? parsed.posts : []
+            setStatus('Loaded.', 'ok')
+          }
+          posts.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+          renderList()
+        } catch (error) {
+          setStatus(error.message, 'error')
+          renderList()
+        }
+      }
+
+      const save = async (nextPosts, message) => {
+        const body = JSON.stringify({ posts: nextPosts }, null, 2) + '\n'
+        const payload = {
+          message,
+          content: encodeBase64(body),
+          branch: BRANCH,
+        }
+        if (sha) payload.sha = sha
+
+        const { data } = await request(API, {
+          method: 'PUT',
+          body: JSON.stringify(payload),
+          headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        })
+
+        sha = data.content.sha
+        posts = nextPosts
+        posts.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+        renderList()
+      }
+
+      const deletePost = async (index) => {
+        const post = posts[index]
+        if (!post) return
+        if (!confirm(`Delete this post?\n\n${post.text.slice(0, 120)}`)) return
+        const next = posts.filter((_, i) => i !== index)
+        setStatus('Deleting…')
+        try {
+          await save(next, `Delete news post: ${post.text.slice(0, 60)}`)
+          setStatus('Deleted. The site updates in a minute or two.', 'ok')
+        } catch (error) {
+          setStatus(error.message, 'error')
+        }
+      }
+
+      $('token-save').addEventListener('click', async () => {
+        const value = $('token').value.trim()
+        if (!value) {
+          setStatus('Paste a token first.', 'error')
+          return
+        }
+        localStorage.setItem(TOKEN_KEY, value)
+        $('token').value = ''
+        $('token-state').textContent = 'Token saved in this browser.'
+        await load()
+      })
+
+      $('token-forget').addEventListener('click', () => {
+        localStorage.removeItem(TOKEN_KEY)
+        sha = null
+        posts = []
+        $('token-state').textContent = 'Token removed from this browser.'
+        setStatus('')
+        renderList()
+      })
+
+      $('post-form').addEventListener('submit', async (event) => {
+        event.preventDefault()
+        if (!token()) {
+          setStatus('Save a token first.', 'error')
+          return
+        }
+        const date = $('post-date').value
+        const tag = $('post-tag').value.trim()
+        const text = $('post-text').value.trim()
+        if (!date || !text) {
+          setStatus('A date and some text are required.', 'error')
+          return
+        }
+
+        const post = { id: `${Date.now()}`, date, text }
+        if (tag) post.tag = tag
+
+        const submit = $('post-submit')
+        submit.disabled = true
+        setStatus('Publishing…')
+        try {
+          await save([post, ...posts], `Add news post: ${text.slice(0, 60)}`)
+          $('post-text').value = ''
+          $('post-tag').value = ''
+          setStatus('Published. The site updates in a minute or two.', 'ok')
+        } catch (error) {
+          setStatus(error.message, 'error')
+        } finally {
+          submit.disabled = false
+        }
+      })
+
+      const today = new Date()
+      $('post-date').value = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 10)
+
+      if (token()) {
+        $('token-state').textContent = 'Token saved in this browser.'
+      }
+      load()
+    </script>
+  </body>
+</html>

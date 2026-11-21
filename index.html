@@ -142,21 +142,10 @@
             </p>
           </header>
 
-          <!-- To add a post: copy the block below, delete the comment markers,
-               change the date, the tag and the text. Put new posts first. -->
-          <!--
-          <div class="feed">
-            <article class="post reveal">
-              <p class="post-meta">
-                <time class="post-date" datetime="2026-11-21">21 November 2026</time>
-                <span class="post-tag">Studio</span>
-              </p>
-              <p class="post-text">Your post goes here. Two or three lines is plenty.</p>
-            </article>
-          </div>
-          -->
+          <!-- Posts come from news.json; add or delete them at /admin.html. -->
+          <div class="feed" id="news-feed" hidden></div>
 
-          <div class="empty-panel reveal">
+          <div class="empty-panel reveal" id="news-empty">
             <p class="empty-panel-badge">No posts yet</p>
             <p class="empty-panel-title">This is where we talk.</p>
             <p class="empty-panel-note">

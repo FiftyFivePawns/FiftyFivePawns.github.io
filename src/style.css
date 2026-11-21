@@ -339,6 +339,7 @@ em {
 .post-text {
   max-width: 62ch;
   font-size: 1.05rem;
+  white-space: pre-line;
 }
 
 .post-text a {

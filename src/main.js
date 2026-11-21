@@ -53,3 +53,68 @@ if (reduceMotion || !('IntersectionObserver' in window)) {
 document.querySelectorAll('[data-year]').forEach((el) => {
   el.textContent = String(new Date().getFullYear())
 })
+
+// News posts live in news.json so they can be added or deleted without
+// touching this page (see admin.html). Without a file, the empty state stays.
+const newsFeed = document.getElementById('news-feed')
+const newsEmpty = document.getElementById('news-empty')
+
+const formatPostDate = (value) => {
+  const date = new Date(`${value}T00:00:00Z`)
+  if (!value || Number.isNaN(date.getTime())) return value || ''
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date)
+}
+
+const buildPost = (post) => {
+  const article = document.createElement('article')
+  article.className = 'post'
+
+  const meta = document.createElement('p')
+  meta.className = 'post-meta'
+
+  const time = document.createElement('time')
+  time.className = 'post-date'
+  if (post.date) time.dateTime = post.date
+  time.textContent = formatPostDate(post.date)
+  meta.append(time)
+
+  if (post.tag) {
+    const tag = document.createElement('span')
+    tag.className = 'post-tag'
+    tag.textContent = post.tag
+    meta.append(tag)
+  }
+
+  const text = document.createElement('p')
+  text.className = 'post-text'
+  text.textContent = post.text
+
+  article.append(meta, text)
+  return article
+}
+
+if (newsFeed) {
+  try {
+    const response = await fetch('news.json', { cache: 'no-store' })
+    if (!response.ok) throw new Error(`news.json returned ${response.status}`)
+    const data = await response.json()
+    const posts = (Array.isArray(data.posts) ? data.posts : [])
+      .filter((post) => post && post.text)
+      .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
+
+    if (posts.length) {
+      const fragment = document.createDocumentFragment()
+      posts.forEach((post) => fragment.append(buildPost(post)))
+      newsFeed.replaceChildren(fragment)
+      newsFeed.hidden = false
+      if (newsEmpty) newsEmpty.hidden = true
+    }
+  } catch (error) {
+    console.warn('News could not be loaded:', error)
+  }
+}
