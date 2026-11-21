@@ -462,7 +462,7 @@ em {
   margin-inline: -0.24em;
   font-family: var(--display);
   font-weight: 400;
-  font-size: clamp(4rem, 17vw, 14rem);
+  font-size: clamp(2.6rem, 9.4vw, 7.8rem);
   line-height: 0.82;
   letter-spacing: -0.015em;
   text-transform: uppercase;
@@ -1048,12 +1048,12 @@ em {
 }
 
 .contact::after {
-  content: "NO SIGNAL";
+  content: "FIFTY FIVE PAWNS";
   position: absolute;
   right: -0.06em;
   bottom: -0.26em;
   font-family: var(--display);
-  font-size: clamp(7rem, 24vw, 20rem);
+  font-size: clamp(4rem, 13vw, 11rem);
   line-height: 0.78;
   color: transparent;
   -webkit-text-stroke: 1px rgba(8, 8, 10, 0.28);
@@ -1212,7 +1212,7 @@ em {
 
 @media (max-width: 520px) {
   .wordmark {
-    font-size: clamp(3.2rem, 16vw, 4.4rem);
+    font-size: clamp(2.4rem, 12.5vw, 3.4rem);
   }
 
   .cover img {
