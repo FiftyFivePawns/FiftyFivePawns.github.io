@@ -78,7 +78,16 @@ if (marqueeTrack) {
   }
 
   fillMarquee()
-  window.addEventListener('resize', fillMarquee)
+  // Anton arrives after first paint and changes the group width, so re-measure
+  // once it is in, and whenever the bar itself changes size.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(fillMarquee)
+  }
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(fillMarquee).observe(marquee)
+  } else {
+    window.addEventListener('resize', fillMarquee)
+  }
 }
 
 // News posts live in news.json so they can be added or deleted without
