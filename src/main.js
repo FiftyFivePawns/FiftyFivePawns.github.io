@@ -90,6 +90,25 @@ if (marqueeTrack) {
   }
 }
 
+// Discord member count from the public invite API (no auth, CORS allowed).
+const discordCount = document.querySelector('[data-discord-count]')
+if (discordCount) {
+  fetch('https://discord.com/api/v10/invites/Aea5kMJXNq?with_counts=true')
+    .then((r) => (r.ok ? r.json() : null))
+    .then((data) => {
+      if (!data) return
+      const members = data.approximate_member_count
+      const online = data.approximate_presence_count
+      const parts = []
+      if (typeof members === 'number') parts.push(`${members} members`)
+      if (typeof online === 'number') parts.push(`${online} online`)
+      if (parts.length) discordCount.textContent = ` · ${parts.join(' · ')}`
+    })
+    .catch(() => {
+      /* leave the bare "Discord" label if the request fails */
+    })
+}
+
 // News posts live in news.json so they can be added or deleted without
 // touching this page (see admin.html). Without a file, the empty state stays.
 const newsFeed = document.getElementById('news-feed')
