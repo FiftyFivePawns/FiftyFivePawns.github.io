@@ -113,6 +113,8 @@ if (discordCount) {
 // touching this page (see newsdesk.html). Without a file, the empty state stays.
 const newsFeed = document.getElementById('news-feed')
 const newsEmpty = document.getElementById('news-empty')
+const eraFeed = document.getElementById('era-feed')
+const eraEmpty = document.getElementById('era-empty')
 
 const formatPostDate = (value) => {
   const date = new Date(`${value}T00:00:00Z`)
@@ -153,7 +155,18 @@ const buildPost = (post) => {
   return article
 }
 
-if (newsFeed) {
+// One list of posts, two sections: everything is news unless it is filed
+// under "era" in the news desk.
+const renderSection = (feed, empty, posts) => {
+  if (!feed) return
+  const fragment = document.createDocumentFragment()
+  posts.forEach((post) => fragment.append(buildPost(post)))
+  feed.replaceChildren(fragment)
+  feed.hidden = posts.length === 0
+  if (empty) empty.hidden = posts.length > 0
+}
+
+if (newsFeed || eraFeed) {
   try {
     const response = await fetch('news.json', { cache: 'no-store' })
     if (!response.ok) throw new Error(`news.json returned ${response.status}`)
@@ -162,13 +175,16 @@ if (newsFeed) {
       .filter((post) => post && post.text)
       .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')))
 
-    if (posts.length) {
-      const fragment = document.createDocumentFragment()
-      posts.forEach((post) => fragment.append(buildPost(post)))
-      newsFeed.replaceChildren(fragment)
-      newsFeed.hidden = false
-      if (newsEmpty) newsEmpty.hidden = true
-    }
+    renderSection(
+      newsFeed,
+      newsEmpty,
+      posts.filter((post) => post.section !== 'era'),
+    )
+    renderSection(
+      eraFeed,
+      eraEmpty,
+      posts.filter((post) => post.section === 'era'),
+    )
   } catch (error) {
     console.warn('News could not be loaded:', error)
   }

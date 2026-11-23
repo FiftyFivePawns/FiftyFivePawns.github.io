@@ -97,6 +97,7 @@
         color: var(--muted);
       }
       input,
+      select,
       textarea {
         width: 100%;
         padding: 0.7rem 0.8rem;
@@ -112,6 +113,7 @@
         min-height: 6rem;
       }
       input:focus,
+      select:focus,
       textarea:focus {
         outline: 2px solid var(--acid);
         outline-offset: 1px;
@@ -170,6 +172,11 @@
       .post-text {
         margin: 0;
         white-space: pre-line;
+      }
+      .post-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
       }
       li button {
         padding: 0.4rem 0.7rem;
@@ -242,6 +249,13 @@
             <label>
               Tag <span class="meta">(optional)</span>
               <input id="post-tag" type="text" maxlength="20" placeholder="Studio" />
+            </label>
+            <label>
+              Section
+              <select id="post-section">
+                <option value="news">News</option>
+                <option value="era">Era</option>
+              </select>
             </label>
           </div>
           <label>
@@ -363,12 +377,27 @@
           text.className = 'post-text'
           text.textContent = post.text
 
+          const section = post.section === 'era' ? 'era' : 'news'
+          const sectionChip = document.createElement('span')
+          sectionChip.className = 'tag'
+          sectionChip.textContent = section === 'era' ? 'Era section' : 'News section'
+          head.append(sectionChip)
+
+          const actions = document.createElement('div')
+          actions.className = 'post-actions'
+
+          const move = document.createElement('button')
+          move.type = 'button'
+          move.textContent = section === 'era' ? 'Move to News' : 'Move to Era'
+          move.addEventListener('click', () => movePost(index, section === 'era' ? 'news' : 'era'))
+
           const remove = document.createElement('button')
           remove.type = 'button'
           remove.textContent = 'Delete'
           remove.addEventListener('click', () => deletePost(index))
 
-          item.append(head, text, remove)
+          actions.append(move, remove)
+          item.append(head, text, actions)
           list.append(item)
         })
       }
@@ -434,6 +463,20 @@
         }
       }
 
+      const movePost = async (index, section) => {
+        const post = posts[index]
+        if (!post) return
+        const label = section === 'era' ? 'Era' : 'News'
+        const next = posts.map((item, i) => (i === index ? { ...item, section } : item))
+        setStatus(`Moving to ${label}…`)
+        try {
+          await save(next, `Move news post to ${label}: ${post.text.slice(0, 60)}`)
+          setStatus(`Moved to ${label}. The site updates in a minute or two.`, 'ok')
+        } catch (error) {
+          setStatus(error.message, 'error')
+        }
+      }
+
       $('token-save').addEventListener('click', async () => {
         const value = $('token').value.trim()
         if (!value) {
@@ -469,7 +512,12 @@
           return
         }
 
-        const post = { id: `${Date.now()}`, date, text }
+        const post = {
+          id: `${Date.now()}`,
+          date,
+          text,
+          section: $('post-section').value === 'era' ? 'era' : 'news',
+        }
         if (tag) post.tag = tag
 
         const submit = $('post-submit')
