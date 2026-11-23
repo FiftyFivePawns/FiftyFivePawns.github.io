@@ -3,3 +3,6 @@ dist/
 .env
 .env.*
 !.env.example
+
+# screenshot artifacts from previewing the site
+/*.png
