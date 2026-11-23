@@ -220,6 +220,18 @@ if (newsFeed || eraFeed) {
   }
 }
 
+// The band name is not a phrase to translate, and Google's widget also rewrites
+// the tab title, so put it back whenever the name disappears from it.
+const originalTitle = document.title
+const titleTag = document.querySelector('title')
+if (titleTag && originalTitle.includes('Fifty Five Pawns')) {
+  new MutationObserver(() => {
+    if (!document.title.includes('Fifty Five Pawns')) {
+      document.title = originalTitle
+    }
+  }).observe(titleTag, { childList: true, characterData: true, subtree: true })
+}
+
 // Page translation. Google's widget is free, keyless and runs on GitHub Pages,
 // but it only translates a page when its googtrans cookie is already set, so
 // the picker writes the cookie and reloads. Its own UI stays hidden (see
