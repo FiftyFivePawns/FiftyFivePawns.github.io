@@ -443,3 +443,39 @@ if (faqForm) {
     })
   }
 }
+
+// FAQ answers live in faq.json, written from the news desk's answer box.
+const faqList = document.querySelector('[data-faq-list]')
+const faqNone = document.getElementById('faq-none')
+
+if (faqList) {
+  try {
+    const response = await fetch('faq.json', { cache: 'no-store' })
+    if (!response.ok) throw new Error(`faq.json returned ${response.status}`)
+    const data = await response.json()
+    const items = (Array.isArray(data.items) ? data.items : []).filter(
+      (item) => item && item.q && item.a,
+    )
+
+    const fragment = document.createDocumentFragment()
+    items.forEach((item) => {
+      const details = document.createElement('details')
+      details.className = 'faq-item'
+
+      const summary = document.createElement('summary')
+      summary.textContent = item.q
+
+      const answer = document.createElement('p')
+      answer.textContent = item.a
+
+      details.append(summary, answer)
+      fragment.append(details)
+    })
+
+    faqList.replaceChildren(fragment)
+    faqList.hidden = items.length === 0
+    if (faqNone) faqNone.hidden = items.length > 0
+  } catch (error) {
+    console.warn('FAQ could not be loaded:', error)
+  }
+}

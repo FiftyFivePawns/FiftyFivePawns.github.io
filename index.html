@@ -318,38 +318,12 @@
           </header>
 
           <div class="faq-grid">
-            <div class="faq-list reveal">
-              <details class="faq-item">
-                <summary>What do you actually sound like?</summary>
-                <p>
-                  Alt-pop with rap verses and rock choruses. Piano and synth under
-                  everything, a ukulele doing things it probably shouldn't, and
-                  two people playing all of it live.
-                </p>
-              </details>
-              <details class="faq-item">
-                <summary>Do you play covers?</summary>
-                <p>
-                  Not usually — we would rather play our own. Ask anyway, for the
-                  right night one might sneak into the set.
-                </p>
-              </details>
-              <details class="faq-item">
-                <summary>How do we book you?</summary>
-                <p>
-                  Send a venue, a date and a rough idea of the night to
-                  FiftyFivePawns@proton.me or fiftyfivepawns@gmail.com. We are in
-                  Taverny, just outside Paris.
-                </p>
-              </details>
-              <details class="faq-item">
-                <summary>When is the first song coming out?</summary>
-                <p>
-                  When it is actually good, not before. Nothing is released yet —
-                  the news section and the Discord hear about it first.
-                </p>
-              </details>
-            </div>
+            <!-- Answers come from faq.json; write them in the news desk. -->
+            <div class="faq-list reveal" data-faq-list></div>
+            <p class="faq-none" id="faq-none" hidden>
+              Nothing answered yet — the box on the right is a good place to
+              start.
+            </p>
 
             <!-- Sends straight to a Discord channel webhook (public/config.json). -->
             <form class="faq-form reveal" data-faq-form>

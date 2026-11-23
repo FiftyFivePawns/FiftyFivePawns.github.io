@@ -272,6 +272,31 @@
         <ul id="post-list"></ul>
       </section>
 
+      <section class="panel">
+        <h2>4 · Answers (FAQ)</h2>
+        <p class="meta">
+          These are the questions and answers in the FAQ on the site, saved to
+          <code>public/faq.json</code>. Paste a question from Discord, write the
+          answer, and it goes live like a post.
+        </p>
+        <form id="faq-form">
+          <label>
+            Question
+            <input id="faq-q" type="text" maxlength="120" required placeholder="When is the first song out?" />
+          </label>
+          <label>
+            Answer
+            <textarea id="faq-a" rows="4" required placeholder="When it is actually good, not before."></textarea>
+          </label>
+          <div class="row" style="grid-template-columns: auto auto">
+            <button type="submit" id="faq-submit">Add answer</button>
+            <button type="button" class="ghost" id="faq-cancel" hidden>Cancel edit</button>
+          </div>
+        </form>
+        <p class="meta" id="faq-state">Loading…</p>
+        <ul id="faq-list"></ul>
+      </section>
+
       <p id="status" role="status"></p>
     </div>
 
@@ -281,6 +306,8 @@
       const PATH = 'public/news.json'
       const BRANCH = 'main'
       const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${PATH}`
+      const FAQ_PATH = 'public/faq.json'
+      const FAQ_API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FAQ_PATH}`
       const TOKEN_KEY = 'fiftyfivepawns_news_token'
 
       const $ = (id) => document.getElementById(id)
@@ -510,6 +537,175 @@
         }
       }
 
+      // ---------- FAQ answers ----------
+
+      let faqSha = null
+      let faqItems = []
+      let editingFaq = -1
+
+      const resetFaqForm = () => {
+        editingFaq = -1
+        $('faq-q').value = ''
+        $('faq-a').value = ''
+        $('faq-submit').textContent = 'Add answer'
+        $('faq-cancel').hidden = true
+      }
+
+      const startEditFaq = (index) => {
+        const entry = faqItems[index]
+        if (!entry) return
+        editingFaq = index
+        $('faq-q').value = entry.q
+        $('faq-a').value = entry.a
+        $('faq-submit').textContent = 'Save changes'
+        $('faq-cancel').hidden = false
+        $('faq-q').focus()
+        setStatus(`Editing “${entry.q.slice(0, 40)}”.`)
+      }
+
+      const renderFaq = () => {
+        const list = $('faq-list')
+        const state = $('faq-state')
+        list.replaceChildren()
+
+        if (!faqItems.length) {
+          state.textContent = token()
+            ? 'No answers yet. Add one above.'
+            : 'Save a token to see and manage the answers.'
+          return
+        }
+
+        state.textContent = `${faqItems.length} answer${faqItems.length === 1 ? '' : 's'}.`
+
+        faqItems.forEach((entry, index) => {
+          const item = document.createElement('li')
+
+          const question = document.createElement('p')
+          question.className = 'post-text'
+          question.textContent = `Q — ${entry.q}`
+
+          const answer = document.createElement('p')
+          answer.className = 'post-text'
+          answer.textContent = `A — ${entry.a}`
+
+          const actions = document.createElement('div')
+          actions.className = 'post-actions'
+
+          const edit = document.createElement('button')
+          edit.type = 'button'
+          edit.textContent = 'Edit'
+          edit.addEventListener('click', () => startEditFaq(index))
+
+          const remove = document.createElement('button')
+          remove.type = 'button'
+          remove.textContent = 'Delete'
+          remove.addEventListener('click', () => deleteFaq(index))
+
+          actions.append(edit, remove)
+          item.append(question, answer, actions)
+          list.append(item)
+        })
+      }
+
+      const loadFaq = async () => {
+        if (!token()) {
+          renderFaq()
+          return
+        }
+        try {
+          const { data, missing } = await request(`${FAQ_API}?ref=${BRANCH}`)
+          if (missing) {
+            faqSha = null
+            faqItems = []
+          } else {
+            faqSha = data.sha
+            const parsed = JSON.parse(decodeBase64(data.content || ''))
+            faqItems = Array.isArray(parsed.items) ? parsed.items : []
+          }
+          renderFaq()
+        } catch (error) {
+          $('faq-state').textContent = error.message
+          renderFaq()
+        }
+      }
+
+      const saveFaq = async (nextItems, message) => {
+        const body = JSON.stringify({ items: nextItems }, null, 2) + '\n'
+        const payload = { message, content: encodeBase64(body), branch: BRANCH }
+        if (faqSha) payload.sha = faqSha
+
+        const { data } = await request(FAQ_API, {
+          method: 'PUT',
+          body: JSON.stringify(payload),
+          headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        })
+
+        faqSha = data.content.sha
+        faqItems = nextItems
+        renderFaq()
+      }
+
+      const deleteFaq = async (index) => {
+        const entry = faqItems[index]
+        if (!entry) return
+        if (!confirm(`Delete this answer?\n\n${entry.q}`)) return
+        const next = faqItems.filter((_, i) => i !== index)
+        setStatus('Deleting…')
+        try {
+          await saveFaq(next, `Delete FAQ answer: ${entry.q.slice(0, 60)}`)
+          if (editingFaq === index) resetFaqForm()
+          setStatus('Deleted. The site updates in a minute or two.', 'ok')
+        } catch (error) {
+          setStatus(error.message, 'error')
+        }
+      }
+
+      $('faq-form').addEventListener('submit', async (event) => {
+        event.preventDefault()
+        if (!token()) {
+          setStatus('Save a token first.', 'error')
+          return
+        }
+
+        const q = $('faq-q').value.trim()
+        const a = $('faq-a').value.trim()
+        if (!q || !a) {
+          setStatus('A question and an answer are both needed.', 'error')
+          return
+        }
+
+        const wasEditing = editingFaq >= 0
+        const next = wasEditing
+          ? faqItems.map((item, i) => (i === editingFaq ? { ...item, q, a } : item))
+          : [...faqItems, { id: `${Date.now()}`, q, a }]
+
+        const submit = $('faq-submit')
+        submit.disabled = true
+        setStatus(wasEditing ? 'Updating…' : 'Adding…')
+        try {
+          await saveFaq(
+            next,
+            `${wasEditing ? 'Update' : 'Add'} FAQ answer: ${q.slice(0, 60)}`,
+          )
+          resetFaqForm()
+          setStatus(
+            wasEditing
+              ? 'Updated. The site updates in a minute or two.'
+              : 'Added. The site updates in a minute or two.',
+            'ok',
+          )
+        } catch (error) {
+          setStatus(error.message, 'error')
+        } finally {
+          submit.disabled = false
+        }
+      })
+
+      $('faq-cancel').addEventListener('click', () => {
+        resetFaqForm()
+        setStatus('')
+      })
+
       const acceptToken = async (value) => {
         if (!value) {
           setStatus('Paste a token first.', 'error')
@@ -520,6 +716,7 @@
         $('token').placeholder = 'Saved — paste a new one to replace it'
         $('token-state').textContent = tokenState()
         await load()
+        await loadFaq()
       }
 
       $('token-save').addEventListener('click', () => acceptToken($('token').value.trim()))
@@ -536,10 +733,14 @@
         forgetToken()
         sha = null
         posts = []
+        faqSha = null
+        faqItems = []
+        resetFaqForm()
         $('token').placeholder = 'github_pat_…'
         $('token-state').textContent = 'Token removed from this browser.'
         setStatus('')
         renderList()
+        renderFaq()
       })
 
       $('post-form').addEventListener('submit', async (event) => {
@@ -587,6 +788,7 @@
       $('token-state').textContent = tokenState()
       if (token()) $('token').placeholder = 'Saved — paste a new one to replace it'
       load()
+      loadFaq()
     </script>
   </body>
 </html>

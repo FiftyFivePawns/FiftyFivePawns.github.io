@@ -1185,6 +1185,15 @@ body {
   padding-bottom: 1.25rem;
   color: rgba(243, 241, 234, 0.72);
   font-size: 0.95rem;
+  white-space: pre-line;
+}
+
+.faq-none {
+  max-width: 46ch;
+  padding: 1.4rem 0;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.95rem;
 }
 
 /* Question box: one field pair, then straight to the Discord webhook. */
