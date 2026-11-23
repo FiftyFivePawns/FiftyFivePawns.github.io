@@ -110,7 +110,7 @@ if (discordCount) {
 }
 
 // News posts live in news.json so they can be added or deleted without
-// touching this page (see admin.html). Without a file, the empty state stays.
+// touching this page (see newsdesk.html). Without a file, the empty state stays.
 const newsFeed = document.getElementById('news-feed')
 const newsEmpty = document.getElementById('news-empty')
 
