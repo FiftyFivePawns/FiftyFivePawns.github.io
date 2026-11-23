@@ -157,6 +157,36 @@ const buildPost = (post) => {
 
 // One list of posts, two sections: everything is news unless it is filed
 // under "era" in the news desk.
+// Tab switch at the top right of the news section.
+const feedTabs = [...document.querySelectorAll('[data-feed-tab]')]
+const feedPanels = {
+  news: document.getElementById('panel-news'),
+  era: document.getElementById('panel-era'),
+}
+
+const showFeed = (key) => {
+  feedTabs.forEach((tab) => {
+    const active = tab.dataset.feedTab === key
+    tab.classList.toggle('is-active', active)
+    tab.setAttribute('aria-selected', String(active))
+    tab.tabIndex = active ? 0 : -1
+  })
+  Object.entries(feedPanels).forEach(([name, panel]) => {
+    if (panel) panel.hidden = name !== key
+  })
+}
+
+feedTabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => showFeed(tab.dataset.feedTab))
+  tab.addEventListener('keydown', (event) => {
+    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return
+    event.preventDefault()
+    const next = feedTabs[(index + (event.key === 'ArrowRight' ? 1 : feedTabs.length - 1)) % feedTabs.length]
+    showFeed(next.dataset.feedTab)
+    next.focus()
+  })
+})
+
 const renderSection = (feed, empty, posts) => {
   if (!feed) return
   const fragment = document.createDocumentFragment()

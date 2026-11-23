@@ -306,6 +306,45 @@ em {
   font-size: 0.9rem;
 }
 
+/* News / Self Titled switch, top right of the news section. */
+.feed-switch {
+  display: inline-flex;
+  border: 1px solid var(--line);
+}
+
+.feed-tab {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0.62rem 1rem;
+  color: var(--muted);
+  font-family: var(--body);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.feed-tab + .feed-tab {
+  border-left: 1px solid var(--line);
+}
+
+.feed-tab:hover {
+  color: var(--paper);
+}
+
+.feed-tab.is-active {
+  background: var(--red);
+  color: var(--ink);
+}
+
+.feed-tab:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 2px;
+}
+
 /* News feed. One <article class="post"> per post, stacked newest first. */
 .feed {
   display: grid;

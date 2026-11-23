@@ -254,7 +254,7 @@
               Section
               <select id="post-section">
                 <option value="news">News</option>
-                <option value="era">Era</option>
+                <option value="era">Self Titled (Era)</option>
               </select>
             </label>
           </div>
@@ -413,7 +413,7 @@
           const section = post.section === 'era' ? 'era' : 'news'
           const sectionChip = document.createElement('span')
           sectionChip.className = 'tag'
-          sectionChip.textContent = section === 'era' ? 'Era section' : 'News section'
+          sectionChip.textContent = section === 'era' ? 'Self Titled' : 'News'
           head.append(sectionChip)
 
           const actions = document.createElement('div')
@@ -421,7 +421,7 @@
 
           const move = document.createElement('button')
           move.type = 'button'
-          move.textContent = section === 'era' ? 'Move to News' : 'Move to Era'
+          move.textContent = section === 'era' ? 'Move to News' : 'Move to Self Titled'
           move.addEventListener('click', () => movePost(index, section === 'era' ? 'news' : 'era'))
 
           const remove = document.createElement('button')
@@ -499,7 +499,7 @@
       const movePost = async (index, section) => {
         const post = posts[index]
         if (!post) return
-        const label = section === 'era' ? 'Era' : 'News'
+        const label = section === 'era' ? 'Self Titled' : 'News'
         const next = posts.map((item, i) => (i === index ? { ...item, section } : item))
         setStatus(`Moving to ${label}…`)
         try {
