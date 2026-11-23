@@ -459,6 +459,21 @@ em {
   opacity: 0.5;
 }
 
+/* Blurred logo sitting between the photo and the text. */
+.hero-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  width: min(92vw, 960px);
+  height: auto;
+  transform: translate(-50%, -50%);
+  filter: blur(46px) saturate(1.05);
+  opacity: 0.32;
+  pointer-events: none;
+  user-select: none;
+}
+
 /* The photo is only a ghost here: the hero is the same old black as the
    rest of the page, with the stage light bleeding through the grain. */
 .hero::before {
