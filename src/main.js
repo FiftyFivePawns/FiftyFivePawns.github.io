@@ -220,62 +220,28 @@ if (newsFeed || eraFeed) {
   }
 }
 
-// Page translation. The Google widget is free, keyless and works from GitHub
-// Pages, but its own UI cannot be themed, so it is mounted hidden and this
-// picker drives the <select> it builds. The choice is remembered.
+// Page translation. Google's widget is free, keyless and runs on GitHub Pages,
+// but it only translates a page when its googtrans cookie is already set, so
+// the picker writes the cookie and reloads. Its own UI stays hidden (see
+// index.html); visitors only ever see this select.
 const langSelect = document.querySelector('[data-lang-select]')
-const LANG_KEY = 'fiftyfivepawns_lang'
 
-const googleCombo = () => document.querySelector('select.goog-te-combo')
-
-const storeLanguage = (value, remove) => {
-  try {
-    if (remove) localStorage.removeItem(LANG_KEY)
-    else localStorage.setItem(LANG_KEY, value)
-  } catch {
-    /* private mode: the picker still works, it just forgets */
-  }
-}
-
-const readLanguage = () => {
-  try {
-    return localStorage.getItem(LANG_KEY) || ''
-  } catch {
-    return ''
-  }
-}
-
-const driveTranslate = (code) => {
-  const combo = googleCombo()
-  if (!combo) return false
-  combo.value = code
-  combo.dispatchEvent(new Event('change', { bubbles: true }))
-  return true
-}
-
-// The Google script is async and only creates its <select> after it lands.
-const whenComboReady = (run, tries = 40) => {
-  if (run()) return
-  if (tries <= 0) return
-  setTimeout(() => whenComboReady(run, tries - 1), 250)
+const translatedLanguage = () => {
+  const match = document.cookie.match(/(?:^|;\s*)googtrans=\/en\/([\w-]+)/)
+  return match ? match[1] : ''
 }
 
 if (langSelect) {
-  const savedLanguage = readLanguage()
-  if (savedLanguage) langSelect.value = savedLanguage
+  const active = translatedLanguage()
+  if (active) langSelect.value = active
 
   langSelect.addEventListener('change', () => {
     const code = langSelect.value
-    storeLanguage(code, !code)
-    if (driveTranslate(code)) return
-    // Widget blocked or still loading: Google also obeys this cookie on load.
     document.cookie = code
       ? `googtrans=/en/${code}; path=/`
       : 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
     window.location.reload()
   })
-
-  if (savedLanguage) whenComboReady(() => driveTranslate(savedLanguage))
 }
 
 // FAQ questions are posted to a Discord channel webhook. The URL is public by
