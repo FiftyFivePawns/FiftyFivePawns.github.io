@@ -295,6 +295,16 @@
         </form>
         <p class="meta" id="faq-state">Loading…</p>
         <ul id="faq-list"></ul>
+
+        <label style="margin-top: 1.2rem">
+          Discord webhook <span class="meta">(optional — posts every new answer into a channel)</span>
+          <input id="faq-hook" type="password" autocomplete="off" placeholder="https://discord.com/api/webhooks/…" />
+        </label>
+        <div class="row" style="grid-template-columns: auto auto">
+          <button type="button" class="ghost" id="faq-hook-save">Save webhook</button>
+          <button type="button" class="ghost" id="faq-hook-forget">Forget webhook</button>
+        </div>
+        <p class="meta" id="faq-hook-state">No webhook saved — answers stay on the site only.</p>
       </section>
 
       <p id="status" role="status"></p>
@@ -543,6 +553,50 @@
       let faqItems = []
       let editingFaq = -1
 
+      const HOOK_KEY = 'fiftyfivepawns_faq_hook'
+
+      const hook = () => {
+        try {
+          return localStorage.getItem(HOOK_KEY) || ''
+        } catch (error) {
+          return ''
+        }
+      }
+
+      const hookState = () => {
+        const saved = hook()
+        return saved
+          ? `Answers are also posted to Discord (webhook ends ${saved.slice(-6)}).`
+          : 'No webhook saved — answers stay on the site only.'
+      }
+
+      // Posts the answer through a Discord webhook. A webhook needs no bot,
+      // no hosting and no invite: it just appears in the channel as its own
+      // sender, which is what a bot looks like to everyone reading.
+      const announce = async (entry, edited) => {
+        const url = hook()
+        if (!url) return null
+
+        const content = [
+          edited ? '**Answer updated on the site**' : '**New answer on the site**',
+          `**Q —** ${entry.q}`,
+          `**A —** ${entry.a}`,
+        ]
+          .join('\n')
+          .slice(0, 1900)
+
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content, allowed_mentions: { parse: [] } }),
+          })
+          return response.ok
+        } catch (error) {
+          return false
+        }
+      }
+
       const resetFaqForm = () => {
         editingFaq = -1
         $('faq-q').value = ''
@@ -687,13 +741,25 @@
             next,
             `${wasEditing ? 'Update' : 'Add'} FAQ answer: ${q.slice(0, 60)}`,
           )
+          // Read the entry before the form reset clears the editing index.
+          const entry = wasEditing ? next[editingFaq] : next[next.length - 1]
           resetFaqForm()
-          setStatus(
-            wasEditing
-              ? 'Updated. The site updates in a minute or two.'
-              : 'Added. The site updates in a minute or two.',
-            'ok',
-          )
+
+          const posted = await announce(entry, wasEditing)
+
+          if (posted === false) {
+            setStatus(
+              'Saved on the site, but Discord refused the message — check the webhook at the bottom of this panel.',
+              'error',
+            )
+          } else {
+            setStatus(
+              posted
+                ? 'Saved and posted to Discord. The page updates in a minute or two.'
+                : 'Saved. The page updates in a minute or two.',
+              'ok',
+            )
+          }
         } catch (error) {
           setStatus(error.message, 'error')
         } finally {
@@ -704,6 +770,42 @@
       $('faq-cancel').addEventListener('click', () => {
         resetFaqForm()
         setStatus('')
+      })
+
+      $('faq-hook-save').addEventListener('click', () => {
+        const value = $('faq-hook').value.trim()
+        const looksRight =
+          /^https:\/\/(?:(?:ptb|canary)\.)?discord(?:app)?\.com\/api\/(?:v\d+\/)?webhooks\/\d+\/[\w-]+$/.test(
+            value,
+          )
+        if (!looksRight) {
+          setStatus(
+            'That does not look like a Discord webhook. It should start with https://discord.com/api/webhooks/…',
+            'error',
+          )
+          return
+        }
+        try {
+          localStorage.setItem(HOOK_KEY, value)
+        } catch (error) {
+          setStatus('This browser refused to store the webhook.', 'error')
+          return
+        }
+        $('faq-hook').value = ''
+        $('faq-hook').placeholder = 'Saved — paste a new one to replace it'
+        $('faq-hook-state').textContent = hookState()
+        setStatus('Webhook saved. New answers will be posted to Discord.', 'ok')
+      })
+
+      $('faq-hook-forget').addEventListener('click', () => {
+        try {
+          localStorage.removeItem(HOOK_KEY)
+        } catch (error) {
+          /* nothing stored to remove */
+        }
+        $('faq-hook').placeholder = 'https://discord.com/api/webhooks/…'
+        $('faq-hook-state').textContent = hookState()
+        setStatus('Webhook removed from this browser.', 'ok')
       })
 
       const acceptToken = async (value) => {
@@ -787,6 +889,8 @@
 
       $('token-state').textContent = tokenState()
       if (token()) $('token').placeholder = 'Saved — paste a new one to replace it'
+      $('faq-hook-state').textContent = hookState()
+      if (hook()) $('faq-hook').placeholder = 'Saved — paste a new one to replace it'
       load()
       loadFaq()
     </script>
