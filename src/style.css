@@ -1528,6 +1528,28 @@ body {
   }
 }
 
+@media (max-width: 560px) {
+  /* The language picker and Menu button need the room, and the wordmark sits
+     right below in the hero, so the header keeps only the mark. */
+  .brand span {
+    display: none;
+  }
+
+  .lang-select {
+    max-width: 6.8rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    padding: 0.5rem 1.35rem 0.5rem 0.55rem;
+    text-overflow: ellipsis;
+  }
+
+  .nav-toggle {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+  }
+}
+
 @media (max-width: 520px) {
   .wordmark {
     font-size: clamp(2.4rem, 12.5vw, 3.4rem);
