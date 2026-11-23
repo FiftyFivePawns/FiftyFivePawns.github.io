@@ -219,3 +219,171 @@ if (newsFeed || eraFeed) {
     console.warn('News could not be loaded:', error)
   }
 }
+
+// Page translation. The Google widget is free, keyless and works from GitHub
+// Pages, but its own UI cannot be themed, so it is mounted hidden and this
+// picker drives the <select> it builds. The choice is remembered.
+const langSelect = document.querySelector('[data-lang-select]')
+const LANG_KEY = 'fiftyfivepawns_lang'
+
+const googleCombo = () => document.querySelector('select.goog-te-combo')
+
+const storeLanguage = (value, remove) => {
+  try {
+    if (remove) localStorage.removeItem(LANG_KEY)
+    else localStorage.setItem(LANG_KEY, value)
+  } catch {
+    /* private mode: the picker still works, it just forgets */
+  }
+}
+
+const readLanguage = () => {
+  try {
+    return localStorage.getItem(LANG_KEY) || ''
+  } catch {
+    return ''
+  }
+}
+
+const driveTranslate = (code) => {
+  const combo = googleCombo()
+  if (!combo) return false
+  combo.value = code
+  combo.dispatchEvent(new Event('change', { bubbles: true }))
+  return true
+}
+
+// The Google script is async and only creates its <select> after it lands.
+const whenComboReady = (run, tries = 40) => {
+  if (run()) return
+  if (tries <= 0) return
+  setTimeout(() => whenComboReady(run, tries - 1), 250)
+}
+
+if (langSelect) {
+  const savedLanguage = readLanguage()
+  if (savedLanguage) langSelect.value = savedLanguage
+
+  langSelect.addEventListener('change', () => {
+    const code = langSelect.value
+    storeLanguage(code, !code)
+    if (driveTranslate(code)) return
+    // Widget blocked or still loading: Google also obeys this cookie on load.
+    document.cookie = code
+      ? `googtrans=/en/${code}; path=/`
+      : 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    window.location.reload()
+  })
+
+  if (savedLanguage) whenComboReady(() => driveTranslate(savedLanguage))
+}
+
+// FAQ questions are posted to a Discord channel webhook. The URL is public by
+// nature (there is no server here to hide it), so the form is length-limited,
+// rate-limited and has a honeypot, and the hook can be regenerated any time.
+const faqForm = document.querySelector('[data-faq-form]')
+
+if (faqForm) {
+  const status = faqForm.querySelector('[data-faq-status]')
+  const button = faqForm.querySelector('button[type="submit"]')
+  const LAST_SENT = 'fiftyfivepawns_faq_sent'
+
+  const setStatus = (message, tone = '') => {
+    if (!status) return
+    status.textContent = message
+    if (tone) status.dataset.tone = tone
+    else delete status.dataset.tone
+  }
+
+  let webhook = ''
+  try {
+    const response = await fetch('config.json', { cache: 'no-store' })
+    if (response.ok) {
+      const config = await response.json()
+      webhook = String(config.faqWebhook || '').trim()
+    }
+  } catch (error) {
+    console.warn('FAQ config could not be loaded:', error)
+  }
+
+  if (!/^https:\/\/discord(?:app)?\.com\/api\/webhooks\//.test(webhook)) {
+    if (button) {
+      button.disabled = true
+      button.textContent = 'Not connected yet'
+    }
+    setStatus('The question box is not wired up yet — email fiftyfivepawns@gmail.com for now.')
+  } else {
+    faqForm.addEventListener('submit', async (event) => {
+      event.preventDefault()
+
+      const question = faqForm.elements.question.value.trim()
+      const from = faqForm.elements.from.value.trim()
+
+      // Honeypot: a bot fills it, a person never sees it.
+      if (faqForm.elements.website.value) {
+        faqForm.reset()
+        setStatus('Sent — we answer these in the Discord.', 'ok')
+        return
+      }
+
+      if (question.length < 5) {
+        setStatus('A few more words, please.', 'error')
+        return
+      }
+
+      let lastSent = 0
+      try {
+        lastSent = Number(localStorage.getItem(LAST_SENT)) || 0
+      } catch {
+        /* no storage: let it through */
+      }
+      if (Date.now() - lastSent < 60_000) {
+        setStatus('One question a minute — try again in a moment.', 'error')
+        return
+      }
+
+      if (button) button.disabled = true
+      setStatus('Sending…', 'busy')
+
+      const language = langSelect ? langSelect.value || 'en' : 'en'
+
+      try {
+        const url = webhook.includes('?') ? webhook : `${webhook}?wait=true`
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: 'Fifty Five Pawns site',
+            allowed_mentions: { parse: [] },
+            embeds: [
+              {
+                title: 'New question from the site',
+                description: question.slice(0, 1000),
+                color: 0xff2f2f,
+                fields: [
+                  { name: 'From', value: from.slice(0, 60) || 'Anonymous', inline: true },
+                  { name: 'Page language', value: language, inline: true },
+                ],
+                timestamp: new Date().toISOString(),
+              },
+            ],
+          }),
+        })
+        if (!response.ok) throw new Error(`Discord returned ${response.status}`)
+
+        faqForm.reset()
+        setStatus('Sent — we answer these in the Discord.', 'ok')
+        try {
+          localStorage.setItem(LAST_SENT, String(Date.now()))
+        } catch {
+          /* no storage: fine */
+        }
+      } catch (error) {
+        console.warn('FAQ question could not be sent:', error)
+        setStatus('That did not go through. Try again, or email fiftyfivepawns@gmail.com.', 'error')
+      } finally {
+        if (button) button.disabled = false
+      }
+    })
+  }
+}

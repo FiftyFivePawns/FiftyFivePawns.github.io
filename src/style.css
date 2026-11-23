@@ -150,6 +150,40 @@ em {
   top: 1rem;
 }
 
+/* ---------- google translate ---------- */
+
+/* The site has its own picker, so hide everything Google injects: the top
+   banner, the tooltip and the little "translated by" bar. */
+.goog-te-banner-frame,
+iframe.skiptranslate,
+#goog-gt-tt,
+.goog-te-balloon-frame,
+.goog-tooltip {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
+}
+
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* The widget sits here, visible to nobody: main.js works its <select>. */
+.gt-hidden {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* ---------- header ---------- */
 
 .site-header {
@@ -172,6 +206,56 @@ em {
   justify-content: space-between;
   gap: 1rem;
   height: 74px;
+}
+
+.header-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.lang {
+  position: relative;
+  display: inline-flex;
+}
+
+.lang-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Native select so it works with keyboards and phones; the chevron is drawn
+   with a background image. */
+.lang-select {
+  appearance: none;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23f3f1ea' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.55rem center;
+  background-size: 9px 6px;
+  border: 1px solid var(--line);
+  color: var(--paper);
+  font-family: var(--body);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.52rem 1.6rem 0.52rem 0.7rem;
+  cursor: pointer;
+  max-width: 11rem;
+}
+
+.lang-select:hover {
+  border-color: rgba(243, 241, 234, 0.45);
+}
+
+.lang-select option {
+  background: var(--ink-soft);
+  color: var(--paper);
 }
 
 .brand {
@@ -432,6 +516,12 @@ em {
 .btn-ghost:hover {
   border-color: var(--paper);
   background: rgba(243, 241, 234, 0.08);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* ---------- hero ---------- */
@@ -1018,6 +1108,154 @@ em {
   text-transform: uppercase;
 }
 
+/* ---------- faq ---------- */
+
+.faq-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: clamp(2rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+.faq-list {
+  border-top: 1px solid var(--line);
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--line);
+}
+
+.faq-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 0;
+  font-family: var(--display);
+  font-size: 1.15rem;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+  transition: color 0.2s ease;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary::after {
+  content: "+";
+  flex: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--red);
+}
+
+.faq-item[open] summary::after {
+  content: "–";
+}
+
+.faq-item summary:hover {
+  color: var(--red);
+}
+
+.faq-item p {
+  max-width: 52ch;
+  padding-bottom: 1.25rem;
+  color: rgba(243, 241, 234, 0.72);
+  font-size: 0.95rem;
+}
+
+/* Question box: one field pair, then straight to the Discord webhook. */
+.faq-form {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1.35rem, 3vw, 2rem);
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--red);
+  background: rgba(16, 16, 20, 0.72);
+}
+
+.faq-form-head {
+  font-family: var(--display);
+  font-size: 1.4rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.field-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.field-opt {
+  color: rgba(146, 143, 137, 0.65);
+  letter-spacing: 0.14em;
+}
+
+.field-input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  background: rgba(8, 8, 10, 0.8);
+  border: 1px solid var(--line);
+  color: var(--paper);
+  font-family: var(--body);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.field-input::placeholder {
+  color: rgba(146, 143, 137, 0.6);
+}
+
+.field-input:hover {
+  border-color: rgba(243, 241, 234, 0.32);
+}
+
+.field-input:focus {
+  border-color: var(--paper);
+}
+
+/* Bots fill in every field they find; people never see this one. */
+.faq-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.faq-status {
+  min-height: 1.2em;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.faq-status[data-tone="ok"] {
+  color: var(--acid);
+}
+
+.faq-status[data-tone="error"] {
+  color: #ff8a8a;
+}
+
+.faq-status[data-tone="busy"] {
+  color: var(--paper);
+}
+
 /* ---------- contact ---------- */
 
 .contact {
@@ -1067,6 +1305,24 @@ em {
 }
 
 .contact-mail:hover {
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.contact-alt {
+  margin-top: 1.1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(8, 8, 10, 0.7);
+}
+
+.contact-alt a {
+  border-bottom: 1px solid rgba(8, 8, 10, 0.4);
+}
+
+.contact-alt a:hover {
   border-color: var(--ink);
   color: #fff;
 }
@@ -1170,8 +1426,15 @@ em {
 
 @media (max-width: 900px) {
   .music-grid,
-  .about-grid {
+  .about-grid,
+  .faq-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .nav {
+    gap: 0.85rem;
+    font-size: 0.64rem;
+    letter-spacing: 0.13em;
   }
 
   .cover {

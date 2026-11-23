@@ -44,8 +44,41 @@
           <a href="#news">News</a>
           <a href="#tour">Tour</a>
           <a href="#about">The band</a>
+          <a href="#faq">FAQ</a>
           <a class="nav-book" href="#contact">Book us</a>
         </nav>
+        <div class="header-tools">
+          <!-- Google Translate drives this; main.js swaps its hidden list for
+               the picker below, so visitors only ever see the 15 languages. -->
+          <label class="lang">
+            <span class="lang-label">Language</span>
+            <select class="lang-select" data-lang-select aria-label="Translate this page">
+              <option value="">English</option>
+              <option value="zh-CN">中文</option>
+              <option value="hi">हिन्दी</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="ar">العربية</option>
+              <option value="bn">বাংলা</option>
+              <option value="pt">Português</option>
+              <option value="ru">Русский</option>
+              <option value="ur">اردو</option>
+              <option value="id">Bahasa Indonesia</option>
+              <option value="de">Deutsch</option>
+              <option value="ja">日本語</option>
+              <option value="mr">मराठी</option>
+              <option value="te">తెలుగు</option>
+            </select>
+          </label>
+          <button
+            class="nav-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="primary-nav"
+          >
+            Menu
+          </button>
+        </div>
       </div>
     </header>
 
@@ -270,6 +303,94 @@
         </div>
       </section>
 
+      <section class="section" id="faq">
+        <div class="wrap">
+          <header class="section-head reveal">
+            <div>
+              <p class="eyebrow"><span class="dot" aria-hidden="true"></span>FAQ</p>
+              <h2 class="display">Ask us<br />anything</h2>
+            </div>
+            <p class="section-note">
+              Four things people ask, and a box for everything else. Questions
+              land in our Discord and get answered there.
+            </p>
+          </header>
+
+          <div class="faq-grid">
+            <div class="faq-list reveal">
+              <details class="faq-item">
+                <summary>What do you actually sound like?</summary>
+                <p>
+                  Alt-pop with rap verses and rock choruses. Piano and synth under
+                  everything, a ukulele doing things it probably shouldn't, and
+                  two people playing all of it live.
+                </p>
+              </details>
+              <details class="faq-item">
+                <summary>Do you play covers?</summary>
+                <p>
+                  Not usually — we would rather play our own. Ask anyway, for the
+                  right night one might sneak into the set.
+                </p>
+              </details>
+              <details class="faq-item">
+                <summary>How do we book you?</summary>
+                <p>
+                  Send a venue, a date and a rough idea of the night to
+                  FiftyFivePawns@proton.me or fiftyfivepawns@gmail.com. We are in
+                  Taverny, just outside Paris.
+                </p>
+              </details>
+              <details class="faq-item">
+                <summary>When is the first song coming out?</summary>
+                <p>
+                  When it is actually good, not before. Nothing is released yet —
+                  the news section and the Discord hear about it first.
+                </p>
+              </details>
+            </div>
+
+            <!-- Sends straight to a Discord channel webhook (public/config.json). -->
+            <form class="faq-form reveal" data-faq-form>
+              <p class="faq-form-head">Send a question</p>
+              <label class="field">
+                <span class="field-label">Your question</span>
+                <textarea
+                  class="field-input"
+                  name="question"
+                  rows="4"
+                  maxlength="500"
+                  required
+                  placeholder="When is the first song out?"
+                ></textarea>
+              </label>
+              <label class="field">
+                <span class="field-label"
+                  >Name or Discord handle
+                  <span class="field-opt">optional</span></span
+                >
+                <input
+                  class="field-input"
+                  type="text"
+                  name="from"
+                  maxlength="40"
+                  autocomplete="nickname"
+                  placeholder="Ethan"
+                />
+              </label>
+              <div class="faq-hp" aria-hidden="true">
+                <label
+                  >Leave this empty
+                  <input type="text" name="website" tabindex="-1" autocomplete="off"
+                /></label>
+              </div>
+              <button class="btn btn-red" type="submit">Send it</button>
+              <p class="faq-status" data-faq-status role="status" aria-live="polite"></p>
+            </form>
+          </div>
+        </div>
+      </section>
+
       <section class="contact" id="contact">
         <div class="wrap">
           <p class="eyebrow"><span class="dot" aria-hidden="true"></span>Booking &amp; press</p>
@@ -280,6 +401,10 @@
             Discord.
           </p>
           <a class="contact-mail" href="mailto:FiftyFivePawns@proton.me">FiftyFivePawns@proton.me</a>
+          <p class="contact-alt">
+            or Gmail —
+            <a href="mailto:fiftyfivepawns@gmail.com">fiftyfivepawns@gmail.com</a>
+          </p>
           <div class="socials">
             <a class="social" href="https://discord.gg/Aea5kMJXNq" target="_blank" rel="noreferrer">Discord<span class="social-count" data-discord-count></span></a>
             <a class="social" href="https://www.instagram.com/fifty_five_pawns/" target="_blank" rel="noreferrer">Instagram</a>
@@ -306,6 +431,25 @@
         <span>© <span data-year>2026</span> Fifty Five Pawns</span>
       </div>
     </footer>
+
+    <!-- Google Translate, hidden: the picker in the header drives it. -->
+    <div id="google_translate_element" class="gt-hidden" aria-hidden="true"></div>
+    <script>
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          {
+            pageLanguage: 'en',
+            includedLanguages: 'en,zh-CN,hi,es,fr,ar,bn,pt,ru,ur,id,de,ja,mr,te',
+            autoDisplay: false,
+          },
+          'google_translate_element',
+        )
+      }
+    </script>
+    <script
+      src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+      async
+    ></script>
 
     <script type="module" src="/src/main.js"></script>
   </body>
