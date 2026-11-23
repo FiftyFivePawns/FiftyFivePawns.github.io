@@ -270,6 +270,16 @@ const writeSession = (key, value) => {
 }
 
 const note = document.querySelector('[data-lang-note]')
+// Snapshot of the English copy, taken before Google's async script runs, so a
+// translation can be told apart from an empty answer (Google marks the page
+// translated-ltr either way).
+const originalLede = (document.querySelector('.hero-lede') || {}).textContent || ''
+
+const looksTranslated = () => {
+  if (document.getElementsByTagName('font').length > 0) return true
+  const lede = (document.querySelector('.hero-lede') || {}).textContent || ''
+  return Boolean(originalLede) && lede !== originalLede
+}
 
 if (langSelect) {
   const wanted = readSession(LANG_WANTED)
@@ -303,11 +313,7 @@ if (langSelect) {
     const translationTries = `fiftyfivepawns_tr_${active}`
 
     setTimeout(() => {
-      const translated =
-        document.documentElement.className.includes('translated-') ||
-        document.getElementsByTagName('font').length > 0
-
-      if (translated) {
+      if (looksTranslated()) {
         writeSession(translationTries, null)
         return
       }
