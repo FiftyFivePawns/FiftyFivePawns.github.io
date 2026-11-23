@@ -269,6 +269,8 @@ const writeSession = (key, value) => {
   }
 }
 
+const note = document.querySelector('[data-lang-note]')
+
 if (langSelect) {
   const wanted = readSession(LANG_WANTED)
   const active = translatedLanguage() || 'en'
@@ -290,9 +292,40 @@ if (langSelect) {
     const code = langSelect.value || 'en'
     writeSession(LANG_WANTED, code)
     writeSession(LANG_TRIES, '0')
+    if (note) note.hidden = true
     setTranslation(code)
     window.location.reload()
   })
+
+  // Google sometimes answers with nothing at all, which left the page reading
+  // English while the picker said Hindi. Ask again, then say it out loud.
+  if (active && active !== 'en') {
+    const translationTries = `fiftyfivepawns_tr_${active}`
+
+    setTimeout(() => {
+      const translated =
+        document.documentElement.className.includes('translated-') ||
+        document.getElementsByTagName('font').length > 0
+
+      if (translated) {
+        writeSession(translationTries, null)
+        return
+      }
+
+      const tries = Number(readSession(translationTries)) || 0
+      if (tries < 2) {
+        writeSession(translationTries, String(tries + 1))
+        window.location.reload()
+        return
+      }
+
+      if (note) {
+        note.hidden = false
+        note.textContent =
+          'The translation service is not answering right now. Try again in a minute, or pick another language.'
+      }
+    }, 7000)
+  }
 }
 
 // FAQ questions are posted to a Discord channel webhook. The URL is public by

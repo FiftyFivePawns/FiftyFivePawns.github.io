@@ -258,6 +258,25 @@ body {
   color: var(--paper);
 }
 
+/* Shown only when Google's translator answers with nothing. */
+.lang-note {
+  position: absolute;
+  top: 100%;
+  right: var(--pad);
+  z-index: 1;
+  max-width: 19rem;
+  margin-top: 0.5rem;
+  padding: 0.55rem 0.8rem;
+  background: rgba(8, 8, 10, 0.96);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--red);
+  color: var(--paper);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
 .brand {
   display: inline-flex;
   align-items: center;
