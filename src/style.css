@@ -20,6 +20,12 @@
   box-sizing: border-box;
 }
 
+/* Panels are laid out with display: flex/grid, which would otherwise beat the
+   hidden attribute the scripts toggle. */
+[hidden] {
+  display: none !important;
+}
+
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
