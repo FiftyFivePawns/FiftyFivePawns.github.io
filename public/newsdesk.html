@@ -293,7 +293,40 @@
         statusEl.className = kind
       }
 
-      const token = () => localStorage.getItem(TOKEN_KEY) || ''
+      const token = () => {
+        try {
+          return localStorage.getItem(TOKEN_KEY) || ''
+        } catch (error) {
+          return ''
+        }
+      }
+
+      const tokenState = () => {
+        const saved = token()
+        if (!saved) return 'No token saved yet — paste one above and it saves by itself.'
+        return `Token saved in this browser (ends ${saved.slice(-4)}).`
+      }
+
+      const rememberToken = (value) => {
+        try {
+          localStorage.setItem(TOKEN_KEY, value)
+          return true
+        } catch (error) {
+          setStatus(
+            'This browser refused to store the token — private windows and some strict settings block local storage. Use a normal window.',
+            'error',
+          )
+          return false
+        }
+      }
+
+      const forgetToken = () => {
+        try {
+          localStorage.removeItem(TOKEN_KEY)
+        } catch (error) {
+          /* nothing stored to remove */
+        }
+      }
 
       const authHeaders = () => ({
         Accept: 'application/vnd.github+json',
@@ -477,22 +510,33 @@
         }
       }
 
-      $('token-save').addEventListener('click', async () => {
-        const value = $('token').value.trim()
+      const acceptToken = async (value) => {
         if (!value) {
           setStatus('Paste a token first.', 'error')
           return
         }
-        localStorage.setItem(TOKEN_KEY, value)
+        if (!rememberToken(value)) return
         $('token').value = ''
-        $('token-state').textContent = 'Token saved in this browser.'
+        $('token').placeholder = 'Saved — paste a new one to replace it'
+        $('token-state').textContent = tokenState()
         await load()
+      }
+
+      $('token-save').addEventListener('click', () => acceptToken($('token').value.trim()))
+
+      // Saving on paste or on leaving the field means a reload can never lose
+      // a token that was typed but never submitted.
+      $('token').addEventListener('change', () => {
+        const value = $('token').value.trim()
+        if (value.length < 20) return
+        acceptToken(value)
       })
 
       $('token-forget').addEventListener('click', () => {
-        localStorage.removeItem(TOKEN_KEY)
+        forgetToken()
         sha = null
         posts = []
+        $('token').placeholder = 'github_pat_…'
         $('token-state').textContent = 'Token removed from this browser.'
         setStatus('')
         renderList()
@@ -540,9 +584,8 @@
         .toISOString()
         .slice(0, 10)
 
-      if (token()) {
-        $('token-state').textContent = 'Token saved in this browser.'
-      }
+      $('token-state').textContent = tokenState()
+      if (token()) $('token').placeholder = 'Saved — paste a new one to replace it'
       load()
     </script>
   </body>
