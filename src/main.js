@@ -237,21 +237,60 @@ if (titleTag && originalTitle.includes('Fifty Five Pawns')) {
 // the picker writes the cookie and reloads. Its own UI stays hidden (see
 // index.html); visitors only ever see this select.
 const langSelect = document.querySelector('[data-lang-select]')
+const LANG_WANTED = 'fiftyfivepawns_lang_wanted'
+const LANG_TRIES = 'fiftyfivepawns_lang_tries'
 
 const translatedLanguage = () => {
   const match = document.cookie.match(/(?:^|;\s*)googtrans=\/en\/([\w-]+)/)
   return match ? match[1] : ''
 }
 
+// English is pinned to Google's own en -> en state instead of deleting the
+// cookie: Google rewrites that cookie while the page navigates away, which put
+// the previous language straight back.
+const setTranslation = (code) => {
+  document.cookie = `googtrans=/en/${code || 'en'}; path=/`
+}
+
+const readSession = (key) => {
+  try {
+    return sessionStorage.getItem(key) || ''
+  } catch {
+    return ''
+  }
+}
+
+const writeSession = (key, value) => {
+  try {
+    if (value === null) sessionStorage.removeItem(key)
+    else sessionStorage.setItem(key, value)
+  } catch {
+    /* storage blocked: the picker still works for this page */
+  }
+}
+
 if (langSelect) {
-  const active = translatedLanguage()
-  if (active) langSelect.value = active
+  const wanted = readSession(LANG_WANTED)
+  const active = translatedLanguage() || 'en'
+  const tries = Number(readSession(LANG_TRIES)) || 0
+
+  // The reload can come back in the old language if the widget wins the race,
+  // so ask again — twice at most, never a loop.
+  if (wanted && wanted !== active && tries < 2) {
+    writeSession(LANG_TRIES, String(tries + 1))
+    setTranslation(wanted)
+    window.location.reload()
+  } else if (wanted === active) {
+    writeSession(LANG_TRIES, null)
+  }
+
+  langSelect.value = active === 'en' ? '' : active
 
   langSelect.addEventListener('change', () => {
-    const code = langSelect.value
-    document.cookie = code
-      ? `googtrans=/en/${code}; path=/`
-      : 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    const code = langSelect.value || 'en'
+    writeSession(LANG_WANTED, code)
+    writeSession(LANG_TRIES, '0')
+    setTranslation(code)
     window.location.reload()
   })
 }
